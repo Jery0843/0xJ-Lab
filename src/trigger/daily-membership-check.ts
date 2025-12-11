@@ -1,7 +1,7 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task, schedules } from "@trigger.dev/sdk/v3";
 import { MembershipChecker } from "@/lib/membership-checker";
 
-// Daily membership expiry check job
+// Daily membership expiry check task
 export const dailyMembershipCheck = task({
   id: "daily-membership-check",
   run: async (payload) => {
@@ -21,4 +21,11 @@ export const dailyMembershipCheck = task({
       return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
+});
+
+// Schedule the task to run daily at 9 AM UTC
+export const dailySchedule = schedules.create({
+  task: "daily-membership-check",
+  cron: "0 9 * * *", // Every day at 9:00 AM UTC
+  timezone: "UTC"
 });
