@@ -27,5 +27,6 @@ export const dailyMembershipCheck = task({
 export const dailySchedule = schedules.create({
   task: "daily-membership-check",
   cron: "0 9 * * *", // Every day at 9:00 AM UTC
+  deduplicationKey: "daily-membership-check",
   timezone: "UTC"
 });
