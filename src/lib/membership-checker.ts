@@ -246,10 +246,14 @@ Is expiry date before current time? Respond VALID if yes, INVALID if no.`;
   // Send webhook notification for expired members
   async notifyExpiredMembers(expiredMembers: ExpiredMember[]): Promise<boolean> {
     if (!this.webhookUrl || expiredMembers.length === 0) {
+      console.log('⚠️ No webhook URL or no expired members to process');
       return false;
     }
 
     try {
+      console.log(`🔄 Sending webhook to: ${this.webhookUrl}`);
+      console.log(`📧 Processing ${expiredMembers.length} expired members`);
+      
       const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: {
@@ -263,9 +267,19 @@ Is expiry date before current time? Respond VALID if yes, INVALID if no.`;
         })
       });
 
-      return response.ok;
+      console.log(`📡 Webhook response status: ${response.status}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Webhook successful:', result);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Webhook failed:', response.status, errorText);
+        return false;
+      }
     } catch (error) {
-      console.error('Error sending webhook:', error);
+      console.error('❌ Error sending webhook:', error);
       return false;
     }
   }
@@ -276,7 +290,18 @@ Is expiry date before current time? Respond VALID if yes, INVALID if no.`;
     
     if (expiredMembers.length > 0) {
       console.log(`Processing ${expiredMembers.length} expired members`);
-      await this.notifyExpiredMembers(expiredMembers);
+      console.log(`🔗 Webhook URL: ${this.webhookUrl}`);
+      
+      const webhookResult = await this.notifyExpiredMembers(expiredMembers);
+      console.log(`📊 Webhook result: ${webhookResult}`);
+      
+      if (webhookResult) {
+        console.log('✅ All expired members processed successfully');
+      } else {
+        console.log('❌ Webhook notification failed');
+      }
+    } else {
+      console.log('📊 No expired members found to process');
     }
   }
 }
