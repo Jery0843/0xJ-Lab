@@ -25,7 +25,8 @@ export async function GET(request: Request) {
 
       const interval = setInterval(async () => {
         try {
-          const messages = await redis.lrange(`${channel}:messages`, 0, -1);
+          // Fetch only last 5 messages to reduce commands
+          const messages = await redis.lrange(`${channel}:messages`, 0, 4);
           const newMessages = messages
             .map((m: any) => typeof m === 'string' ? JSON.parse(m) : m)
             .filter((m: any) => {
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
         } catch (error) {
           console.error('SSE error:', error);
         }
-      }, 300);
+      }, 15000);
 
       const cleanup = () => {
         clearInterval(interval);
